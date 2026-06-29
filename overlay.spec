@@ -6,41 +6,27 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=[
-        # scikit-learn internals
-        'sklearn.utils._cython_blas',
-        'sklearn.neighbors.typedefs',
-        'sklearn.neighbors._partition_nodes',
+        # scikit-learn
         'sklearn.feature_extraction',
         'sklearn.feature_extraction.text',
         'sklearn.metrics.pairwise',
-        'sklearn.utils._weight_vector',
         # PIL
         'PIL._tkinter_finder',
-        # sounddevice needs PortAudio
+        # global hotkeys
+        'keyboard',
+        # sounddevice
         'sounddevice',
-        # voice / vision / rag modules
-        'voice',
-        'voice.recorder',
-        'vision',
-        'vision.screenshot',
-        'rag',
-        'rag.extractor',
-        'rag.chunker',
-        'rag.retriever',
-        # ai modules
-        'ai',
-        'ai.openai_client',
-        'ai.anthropic_client',
-        # ui modules
-        'ui',
-        'ui.app',
-        'ui.chat_tab',
-        'ui.settings_tab',
+        # app modules
+        'voice', 'voice.recorder',
+        'vision', 'vision.screenshot',
+        'rag', 'rag.extractor', 'rag.chunker', 'rag.retriever',
+        'ai', 'ai.openai_client', 'ai.anthropic_client',
+        'ui', 'ui.app', 'ui.chat_tab', 'ui.settings_tab',
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'IPython', 'jupyter', 'notebook'],
+    excludes=['matplotlib', 'IPython', 'jupyter', 'notebook', 'torch', 'torchvision', 'torchaudio', 'tensorflow', 'keras'],
     noarchive=False,
 )
 
@@ -56,7 +42,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,       # ← no black console window
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

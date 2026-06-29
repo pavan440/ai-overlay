@@ -1,8 +1,8 @@
 import io
 import threading
-import wave
 
 import numpy as np
+import scipy.io.wavfile as wav
 import sounddevice as sd
 
 SAMPLE_RATE = 16000
@@ -32,7 +32,9 @@ class VoiceRecorder:
         if not frames:
             return None
         audio = np.concatenate(frames, axis=0)
-        return _to_wav(audio)
+        buf = io.BytesIO()
+        wav.write(buf, SAMPLE_RATE, audio)
+        return buf.getvalue()
 
     def _loop(self) -> None:
         with sd.InputStream(samplerate=SAMPLE_RATE, channels=CHANNELS, dtype="int16") as stream:
@@ -43,13 +45,3 @@ class VoiceRecorder:
                 data, _ = stream.read(1024)
                 with self._lock:
                     self._frames.append(data.copy())
-
-
-def _to_wav(audio: np.ndarray) -> bytes:
-    buf = io.BytesIO()
-    with wave.open(buf, "wb") as wf:
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(2)          # int16 = 2 bytes
-        wf.setframerate(SAMPLE_RATE)
-        wf.writeframes(audio.tobytes())
-    return buf.getvalue()

@@ -297,7 +297,9 @@ class ChatTab(tk.Frame):
             text = transcribe(wav, self._cfg["api_key"], self._cfg["base_url"])
             self._root.after(0, self._insert_transcription, text)
         except Exception as e:
-            self._root.after(0, self.append, "err", f"\n⚠ Transcription error: {e}\n\n")
+            import traceback
+            detail = traceback.format_exc()
+            self._root.after(0, self.append, "err", f"\n⚠ Transcription error: {e}\n{detail}\n")
 
     def _insert_transcription(self, text: str) -> None:
         self._input_box.delete("1.0", tk.END)
