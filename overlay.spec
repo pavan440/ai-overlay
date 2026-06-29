@@ -6,17 +6,12 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=[
-        # scikit-learn
         'sklearn.feature_extraction',
         'sklearn.feature_extraction.text',
         'sklearn.metrics.pairwise',
-        # PIL
         'PIL._tkinter_finder',
-        # global hotkeys
         'keyboard',
-        # sounddevice
         'sounddevice',
-        # app modules
         'voice', 'voice.recorder',
         'vision', 'vision.screenshot',
         'rag', 'rag.extractor', 'rag.chunker', 'rag.retriever',
@@ -26,7 +21,8 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'IPython', 'jupyter', 'notebook', 'torch', 'torchvision', 'torchaudio', 'tensorflow', 'keras'],
+    excludes=['matplotlib', 'IPython', 'jupyter', 'notebook',
+              'torch', 'torchvision', 'torchaudio', 'tensorflow', 'keras'],
     noarchive=False,
 )
 
@@ -35,8 +31,9 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
+    a.binaries,
+    a.datas,
     [],
-    exclude_binaries=True,
     name='AIOverlay',
     debug=False,
     bootloader_ignore_signals=False,
@@ -46,14 +43,5 @@ exe = EXE(
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
-)
-
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='AIOverlay',
+    runtime_tmpdir=None,
 )
