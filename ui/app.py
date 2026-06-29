@@ -102,10 +102,13 @@ class OverlayApp:
             self.hidden = True
 
     def _bind_keys(self) -> None:
-        self.root.bind_all("<Control-h>", lambda e: self._toggle_hide())
-        self.root.bind_all("<Control-r>", lambda e: self.chat_tab.toggle_mic())
-        self.root.bind_all("<Control-g>", lambda e: self.chat_tab._take_screenshot())
-        self.root.bind_all("<Control-q>", lambda e: self.root.destroy())
+        import keyboard
+
+        # Global hotkeys — work even when the window is hidden or unfocused
+        keyboard.add_hotkey("ctrl+h", lambda: self.root.after(0, self._toggle_hide))
+        keyboard.add_hotkey("ctrl+r", lambda: self.root.after(0, self.chat_tab.toggle_mic))
+        keyboard.add_hotkey("ctrl+g", lambda: self.root.after(0, self.chat_tab._take_screenshot))
+        keyboard.add_hotkey("ctrl+q", lambda: self.root.after(0, self.root.destroy))
 
     def run(self) -> None:
         self.root.mainloop()
