@@ -61,14 +61,24 @@ class ChatTab(tk.Frame):
         def sep() -> None:
             tk.Frame(parent, bg=BG_MID, height=1).pack(fill=tk.X, padx=8, pady=6)
 
-        # Voice button
+        # Auto-listen button (VAD — interviewer's voice)
+        self._listen_btn = tk.Button(
+            parent, text="🎧", bg=BG_MID, fg=FG,
+            relief=tk.FLAT, font=("Segoe UI", 22), pady=10,
+            activebackground=BG, command=self.listen_mode,
+        )
+        self._listen_btn.pack(fill=tk.X, padx=8, pady=(12, 0))
+        tk.Label(parent, text="Auto-Listen  Ctrl+L", bg=BG_DARK, fg=FG_MUTED,
+                 font=("Segoe UI", 7)).pack()
+
+        # Manual mic button
         self._mic_btn = tk.Button(
             parent, text="🎤", bg=BG_MID, fg=FG,
             relief=tk.FLAT, font=("Segoe UI", 22), pady=10,
             activebackground=BG, command=self.toggle_mic,
         )
-        self._mic_btn.pack(fill=tk.X, padx=8, pady=(12, 0))
-        tk.Label(parent, text="Voice  Ctrl+R", bg=BG_DARK, fg=FG_MUTED,
+        self._mic_btn.pack(fill=tk.X, padx=8, pady=(8, 0))
+        tk.Label(parent, text="Manual Mic  Ctrl+R", bg=BG_DARK, fg=FG_MUTED,
                  font=("Segoe UI", 7)).pack()
 
         # Screenshot button
@@ -99,7 +109,8 @@ class ChatTab(tk.Frame):
 
         # Shortcuts reference
         shortcuts = [
-            ("Ctrl+R", "Voice"),
+            ("Ctrl+L", "Auto-Listen"),
+            ("Ctrl+R", "Manual Mic"),
             ("Ctrl+G", "Screenshot"),
             ("Ctrl+H", "Hide"),
             ("Ctrl+Q", "Quit"),
@@ -278,7 +289,41 @@ class ChatTab(tk.Frame):
         except Exception as e:
             self._root.after(0, self.append, "err", f"\n⚠ Error: {e}\n\n")
 
-    # ── Voice ─────────────────────────────────────────────────────────────────
+    # ── Auto-listen (VAD) ────────────────────────────────────────────────────
+
+    def listen_mode(self) -> None:
+        """One-press: listen → auto-stop on silence → transcribe → send."""
+        if self._recorder.is_recording:
+            self._recorder.cancel()
+            self._listen_btn.config(bg=BG_MID, fg=FG)
+            return
+        self._listen_btn.config(bg=GREEN, fg=BG_DARK)
+        self.append("dim", "🎧 Listening… (auto-stops when you go quiet)\n")
+        self._recorder.start_vad(self._on_vad_done)
+
+    def _on_vad_done(self, wav: bytes | None) -> None:
+        self._root.after(0, self._listen_btn.config, {"bg": BG_MID, "fg": FG})
+        if not wav:
+            self._root.after(0, self.append, "dim", "⏹ No speech detected.\n")
+            return
+        self._root.after(0, self.append, "dim", "⏹ Transcribing…\n")
+        threading.Thread(target=self._transcribe_and_send, args=(wav,), daemon=True).start()
+
+    def _transcribe_and_send(self, wav: bytes) -> None:
+        try:
+            text = transcribe(wav, self._cfg["api_key"], self._cfg["base_url"])
+            self._root.after(0, self._auto_send, text)
+        except Exception as e:
+            import traceback
+            self._root.after(0, self.append, "err",
+                             f"\n⚠ Transcription error: {e}\n{traceback.format_exc()}\n")
+
+    def _auto_send(self, text: str) -> None:
+        self._input_box.delete("1.0", tk.END)
+        self._input_box.insert(tk.END, text)
+        self.send()
+
+    # ── Manual mic (Ctrl+R) ───────────────────────────────────────────────────
 
     def toggle_mic(self) -> None:
         if self._recorder.is_recording:

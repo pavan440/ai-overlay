@@ -106,6 +106,7 @@ class OverlayApp:
 
         # Global hotkeys — work even when the window is hidden or unfocused
         keyboard.add_hotkey("ctrl+h", lambda: self.root.after(0, self._toggle_hide))
+        keyboard.add_hotkey("ctrl+l", lambda: self.root.after(0, self.chat_tab.listen_mode))
         keyboard.add_hotkey("ctrl+r", lambda: self.root.after(0, self.chat_tab.toggle_mic))
         keyboard.add_hotkey("ctrl+g", lambda: self.root.after(0, self.chat_tab._take_screenshot))
         keyboard.add_hotkey("ctrl+q", lambda: self.root.after(0, self.root.destroy))
